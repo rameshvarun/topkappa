@@ -123,15 +123,6 @@ class ChatLine extends React.Component {
 const API_ENDPOINT = "http://localhost:4000";
 const TOP_CHAT_REFRESH_INTERVAL = 5 * 1000;
 
-const styles = {
-  headline: {
-    fontSize: 24,
-    paddingTop: 16,
-    marginBottom: 12,
-    fontWeight: 400,
-  },
-};
-
 
 class App extends Component {
   constructor(props) {
@@ -198,12 +189,11 @@ async refreshTopChats() {
 									<a href="https://api.twitch.tv/kraken/oauth2/authorize?client_id=kd9kqzvl8bbvw8mlft13rdklxi9w05&redirect_uri=http://localhost:3000&response_type=token%20id_token&scope=openid%20chat_login"><img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" className="twitch-connect" href="#" /></a>
 							}
 						</div>
-						<h1>Top</h1>
+						<div class="chatbar-header">Top</div>
 						<div id="topchats">
 							{ this.state.top_chats.map(chat => <ChatLine upvotes={chat.upvotes} message={chat.message} userstate={chat.userstate} />) }
 						</div>
-						<hr />
-						<h1>New</h1>
+						<div class="chatbar-header">New</div>
 						<div id="newchats">
 							{ this.state.new_chats.map(chat => <ChatLine message={chat.message} userstate={chat.userstate} />) }
 						</div>
