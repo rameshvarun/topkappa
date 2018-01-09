@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "engine.io": "^3.1.4",
+    "loglevel": "^1.6.0",
+    "redis": "^2.8.0",
+    "simple-oauth2": "^1.5.0",
+    "tmi.js": "^1.2.1",
+    "uuid": "^3.1.0"
+  }
+}
