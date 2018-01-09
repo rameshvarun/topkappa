@@ -22,6 +22,8 @@ const NEW_CHATS_MAX = 100;
 const client = new tmi.client({ channels: ["#gamesdonequick"] });
 client.connect();
 
+const UPVOTED_SET = new Set();
+
 function badges(chan, user, isBot) {
 	function createBadge(name) {
 		return <div className={`chat-badge-${name}`}></div>;
@@ -72,7 +74,6 @@ function formatEmotes(text, emotes) {
 class ChatLine extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { upvoted: false };
 }
 
   render() {
@@ -81,7 +82,7 @@ class ChatLine extends React.Component {
         this.props.upvotes && <span>{this.props.upvotes}</span>
       }
 
-      <span className={this.state.upvoted ? "upvoted" : "not-upvoted"} onClick={async () => {
+      <span className={UPVOTED_SET.has(this.props.userstate.id) ? "upvoted" : "not-upvoted"} onClick={async () => {
         await request({
           method: 'POST',
           uri: `${API_ENDPOINT}/upvote`,
@@ -91,7 +92,8 @@ class ChatLine extends React.Component {
             chat_id: this.props.userstate.id,
           }
         });
-        this.setState({ upvoted: true });
+        UPVOTED_SET.add(this.props.userstate.id);
+        this.forceUpdate();
       }}>
         <FontAwesomeIcon icon={faCaretUp} size="lg" />
       </span>
