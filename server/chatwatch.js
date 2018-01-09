@@ -11,9 +11,21 @@ if (process.env.LOGLEVEL) log.setLevel(process.env.LOGLEVEL);
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
+// Recalculate the top charts every five seconds.
 const CALCULATE_TOP_CHATS_INTERVAL = 5 * 1000;
 
+// The top charts can have max 100 chats.
 const NUM_TOP_CHATS = 100;
+
+// Chat data expires after five minutes.
+const DATA_EXPIRE = 5 * 60 * 1000;
+
+// Check for expired data every ten seconds.
+const CHECK_EXPIRE_INTERVAL = 10 * 1000;
+
+function get_seconds_since_epoch() {
+  return (new Date()).getTime() / 1000;
+}
 
 async function main() {
   const db = redis.createClient();
@@ -34,8 +46,15 @@ async function main() {
     }));
 
     results = results.filter(res => res.upvotes > 0);
-    await db.set(`top_chats`, JSON.stringify(results));
+    await db.set('top_chats', JSON.stringify(results));
   }, CALCULATE_TOP_CHATS_INTERVAL);
+
+  setInterval(async () => {
+    log.debug("Removing old chats from sorted set...");
+    let res = await db.zremrangebyscoreAsync(['scores', -get_seconds_since_epoch() + (DATA_EXPIRE / 1000), 'inf']);
+    log.debug("%s chats removed...", res);
+  }, CHECK_EXPIRE_INTERVAL);
+
 
   const client = new tmi.client({
       connection: {
@@ -51,13 +70,16 @@ async function main() {
   client.connect();
 
   client.on("chat", async function (channel, userstate, message, self) {
-    let seconds_since_epoch = (new Date()).getTime() / 1000;
+    let seconds_since_epoch = get_seconds_since_epoch();
     let id = userstate.id;
     var chat = {
       userstate, message
     };
 
+    // Save the chat data, with an expiration time.
     await db.set(`${id}_data`, JSON.stringify(chat));
+    await db.expire(`${id}_data`, DATA_EXPIRE);
+
     await db.zaddAsync(['scores', 'NX', -seconds_since_epoch, id]);
 
     log.debug("Chat message from %s at %f: %s", userstate['display-name'], seconds_since_epoch, message);

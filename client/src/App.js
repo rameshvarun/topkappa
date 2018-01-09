@@ -2,6 +2,10 @@ import React, { Component, Fragment, PureComponent } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import FontAwesomeIcon from '@fortawesome/react-fontawesome'
+import faCaretUp from '@fortawesome/fontawesome-free-solid/faArrowUp'
+
+const request = require('request-promise');
 const queryString = require('query-string');
 const tmi = require("tmi.js");
 
@@ -15,28 +19,8 @@ const stringify = JSON.stringify;
 
 const NEW_CHATS_MAX = 100;
 
-const client = new tmi.client({
-    channels: ["#gamesdonequick"]
-});
-
+const client = new tmi.client({ channels: ["#gamesdonequick"] });
 client.connect();
-
-var socket = require('engine.io-client')('ws://localhost:4000');
-socket.on('open', function(){
-  if (parsedHash.id_token) {
-    socket.send(stringify({
-      type: 'id-token',
-      token: parsedHash.id_token
-    }));
-
-  }
-  socket.on('message', function(data){
-    console.log(data);
-  });
-  socket.on('close', function(){
-    console.log("Socket closed...");
-  });
-});
 
 function badges(chan, user, isBot) {
 	function createBadge(name) {
@@ -85,12 +69,32 @@ function formatEmotes(text, emotes) {
 }
 
 
-class ChatLine extends React.PureComponent {
+class ChatLine extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { upvoted: false };
+}
+
   render() {
     return <div className='chat-line'>
-      <button onClick={() => {
-        socket.send(stringify({ type: "upvote", id: this.props.userstate.id }));
-      }}>UPVOTE </button>
+      {
+        this.props.upvotes && <span>{this.props.upvotes}</span>
+      }
+
+      <span className={this.state.upvoted ? "upvoted" : "not-upvoted"} onClick={async () => {
+        await request({
+          method: 'POST',
+          uri: `${API_ENDPOINT}/upvote`,
+          json: true,
+          qs: {
+            id_token: parsedHash.id_token,
+            chat_id: this.props.userstate.id,
+          }
+        });
+        this.setState({ upvoted: true });
+      }}>
+        <FontAwesomeIcon icon={faCaretUp} size="lg" />
+      </span>
       {badges(null, this.props.userstate, false)}
       <span className='chat-name'>{this.props.userstate['display-name']}</span>
       <span className='chat-colon'></span>
@@ -99,34 +103,58 @@ class ChatLine extends React.PureComponent {
   }
 }
 
+const API_ENDPOINT = "http://localhost:4000";
+const TOP_CHAT_REFRESH_INTERVAL = 5 * 1000;
+
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { new_chats: [] };
+    this.state = { new_chats: [], top_chats: [] };
+}
+
+async refreshTopChats() {
+  let res = await request({
+    uri: `${API_ENDPOINT}/top`,
+    json: true,
+  });
+
+  this.setState(prev => {
+    prev.top_chats = res;
+    return prev;
+  });
 }
 
   async componentDidMount() {
+    this.refreshTopChats();
+    let topCheckInterval = setInterval(() => this.refreshTopChats(), TOP_CHAT_REFRESH_INTERVAL);
+
      client.on("chat", async (channel, userstate, message, self) => {
        log.debug("Chat message from %s: %s", userstate['display-name'], message);
 
-       //if (Math.random() < 0.5) {
+      //  if (Math.random() < 0.5) {
         this.setState((prev) => {
           prev.new_chats.push({ userstate, message });
           prev.new_chats = prev.new_chats.slice(Math.max(prev.new_chats.length - NEW_CHATS_MAX, 0));
           return prev;
         });
-       //}
+      //  }
      });
   }
   render() {
     return (
-      <div>
+      <div id="chatbar">
         <div>
           { !parsedHash.id_token &&
               <a href="https://api.twitch.tv/kraken/oauth2/authorize?client_id=kd9kqzvl8bbvw8mlft13rdklxi9w05&redirect_uri=http://localhost:3000&response_type=token%20id_token&scope=openid%20chat_login"><img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" className="twitch-connect" href="#" /></a>
           }
         </div>
         <div>
+          <h1>Top</h1>
+          { this.state.top_chats.map(chat => <ChatLine upvotes={chat.upvotes} message={chat.message} userstate={chat.userstate} />) }
+        </div>
+        <hr />
+        <h1>New</h1>
+        <div id="newchats">
           { this.state.new_chats.map(chat => <ChatLine message={chat.message} userstate={chat.userstate} />) }
         </div>
       </div>

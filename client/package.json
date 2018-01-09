@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome": "^1.1.1",
+    "@fortawesome/fontawesome-free-solid": "^5.0.3",
+    "@fortawesome/react-fontawesome": "0.0.17",
     "engine.io-client": "^3.1.4",
     "loglevel": "^1.6.0",
     "query-string": "^5.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.0.17",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "rx": "^4.1.0",
     "tmi.js": "^1.2.1"
   },

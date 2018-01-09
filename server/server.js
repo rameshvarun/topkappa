@@ -15,37 +15,35 @@ const NUM_TOP_CHATS = 10;
 
 const UPVOTE_WEIGHT = 10.0;
 
-const server = engine.listen(4000);
 const db = redis.createClient();
 
-server.on('connection', function (socket) {
-  log.debug("Connection opened...");
+const Koa = require('koa');
+const Router = require('koa-router');
 
-  let id_token = null;
+const app = new Koa();
+const router = new Router();
 
-  var topWatchInterval = setInterval(async () => {
-    log.debug("Refetching the top chats.");
-
-  }, TOP_WATCH_INTERVAL);
-
-  console.log("Client connected...");
-  socket.on('message', async (data) => {
-    data = JSON.parse(data);
-    if (data.type === "id-token") {
-      id_token = data.token;
-      log.debug("id_token = %s", id_token);
-    } else if (data.type === "upvote") {
-      let numAdded = await db.saddAsync([`${data.id}_upvotes`, id_token]);
-      if (numAdded == 1) {
-        log.debug("Incrementing score...")
-        await db.zincrbyAsync("scores", -UPVOTE_WEIGHT)
-      }
-    } else {
-      log.error("Unkown message %o.", data);
-    }
-  });
-
-  socket.on('close', function(){
-    clearInteval(topWatchInterval);
-  });
+router.get('/top', async (ctx) => {
+  let results = JSON.parse(await db.getAsync('top_chats'));
+  ctx.body = results;
 });
+
+router.post('/upvote', async (ctx) => {
+  const {id_token, chat_id} = ctx.request.query;
+
+  let numAdded = await db.saddAsync([`${chat_id}_upvotes`, id_token]);
+  if (numAdded == 1) {
+    log.debug("Incrementing score...")
+    await db.zincrbyAsync(["scores", -UPVOTE_WEIGHT, chat_id])
+  }
+  ctx.body = {};
+
+});
+
+app
+  .use(require('koa-cors')())
+  .use(router.routes())
+  .use(router.allowedMethods())
+  .use(require('koa-json'));
+
+app.listen(4000);
