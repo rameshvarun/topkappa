@@ -3,6 +3,7 @@ const uuidv4 = require('uuid/v4');
 const engine = require('engine.io');
 const redis = require("redis");
 const bluebird = require("bluebird");
+const {DATA_EXPIRE} = require('./common');
 
 const log = require('loglevel');
 if (process.env.LOGLEVEL) log.setLevel(process.env.LOGLEVEL);
@@ -16,9 +17,6 @@ const CALCULATE_TOP_CHATS_INTERVAL = 5 * 1000;
 
 // The top charts can have max 100 chats.
 const NUM_TOP_CHATS = 100;
-
-// Chat data expires after five minutes.
-const DATA_EXPIRE = 5 * 60 * 1000;
 
 // Check for expired data every ten seconds.
 const CHECK_EXPIRE_INTERVAL = 10 * 1000;
@@ -46,7 +44,7 @@ async function main() {
     }));
 
     results = results.filter(res => res.upvotes > 0);
-    await db.set('top_chats', JSON.stringify(results));
+    await db.setAsync('top_chats', JSON.stringify(results));
   }, CALCULATE_TOP_CHATS_INTERVAL);
 
   setInterval(async () => {
@@ -77,8 +75,8 @@ async function main() {
     };
 
     // Save the chat data, with an expiration time.
-    await db.set(`${id}_data`, JSON.stringify(chat));
-    await db.expire(`${id}_data`, DATA_EXPIRE);
+    await db.setAsync(`${id}_data`, JSON.stringify(chat));
+    await db.pexpireAsync([`${id}_data`, DATA_EXPIRE]);
 
     await db.zaddAsync(['scores', 'NX', -seconds_since_epoch, id]);
 

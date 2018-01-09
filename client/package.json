@@ -8,6 +8,7 @@
     "@fortawesome/react-fontawesome": "0.0.17",
     "engine.io-client": "^3.1.4",
     "loglevel": "^1.6.0",
+    "material-ui": "^0.20.0",
     "query-string": "^5.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",

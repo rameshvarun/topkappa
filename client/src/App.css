@@ -7,6 +7,12 @@
 
 #newchats {
   overflow-y: scroll;
+  flex-grow: 0.5;
+}
+
+#topchats {
+  overflow-y: scroll;
+  flex-grow: 0.5;
 }
 
 .not-upvoted {
@@ -17,6 +23,14 @@
   color: #FF8B60;
 }
 
+#chat_embed {
+  width: 100%;
+  height: 100%;
+}
+
+.fullheight {
+  height: 100%;
+}
 
 .chat-name {
 	font-weight: 700;

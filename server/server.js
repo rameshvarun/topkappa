@@ -1,6 +1,8 @@
 const engine = require('engine.io');
 const redis = require("redis");
 const bluebird = require("bluebird");
+const {DATA_EXPIRE} = require('./common');
+
 const stringify = JSON.stringify;
 
 const log = require('loglevel');
@@ -23,6 +25,8 @@ const Router = require('koa-router');
 const app = new Koa();
 const router = new Router();
 
+
+
 router.get('/top', async (ctx) => {
   let results = JSON.parse(await db.getAsync('top_chats'));
   ctx.body = results;
@@ -33,6 +37,8 @@ router.post('/upvote', async (ctx) => {
 
   let numAdded = await db.saddAsync([`${chat_id}_upvotes`, id_token]);
   if (numAdded == 1) {
+    await db.pexpireAsync(`${chat_id}_upvotes`, DATA_EXPIRE);
+
     log.debug("Incrementing score...")
     await db.zincrbyAsync(["scores", -UPVOTE_WEIGHT, chat_id])
   }
