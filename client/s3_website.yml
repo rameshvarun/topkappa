@@ -2,4 +2,6 @@ s3_bucket: topkappa-client
 site: build
 index_document: index.html
 max_age:
+  "index.html": 600
+  "static/*": 86400
   "*": 14400
