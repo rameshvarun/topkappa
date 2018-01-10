@@ -52,4 +52,4 @@ app
   .use(router.allowedMethods())
   .use(require('koa-json'));
 
-app.listen(4000);
+app.listen(process.env.PORT || 4000);
