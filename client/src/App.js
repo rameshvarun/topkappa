@@ -123,7 +123,7 @@ class ChatLine extends React.Component {
   }
 }
 
-const API_ENDPOINT = "http://localhost:4000";
+const API_ENDPOINT = "http://ec2-52-204-196-54.compute-1.amazonaws.com";
 const TOP_CHAT_REFRESH_INTERVAL = 5 * 1000;
 
 
