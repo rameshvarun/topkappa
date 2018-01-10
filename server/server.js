@@ -52,4 +52,8 @@ app
   .use(router.allowedMethods())
   .use(require('koa-json'));
 
-app.listen(process.env.PORT || 4000);
+const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || '127.0.0.1';
+
+log.info("Listening on interface %s, port %s.", HOST, PORT);
+app.listen(PORT, HOST);
