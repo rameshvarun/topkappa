@@ -131,7 +131,7 @@ class ChatLine extends React.Component {
 const API_ENDPOINT = (process.env.NODE_ENV === "production") ? "https://d1nqfcql14qmqx.cloudfront.net" : "http://localhost:4000";
 log.info("API Endpoint: %s.", API_ENDPOINT);
 
-const TOP_CHAT_REFRESH_INTERVAL = 5 * 1000;
+const TOP_CHAT_REFRESH_INTERVAL = 3 * 1000;
 
 
 class App extends Component {

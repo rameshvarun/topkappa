@@ -26,7 +26,7 @@ require('koa-ctx-cache-control')(app);
 const UPVOTE_MESSAGE_SCRIPT = loadScript(db, './redis-scripts/upvote-message.lua');
 
 router.get('/top', async (ctx) => {
-  ctx.cacheControl(CALCULATE_TOP_CHATS_INTERVAL);
+  ctx.cacheControl(CALCULATE_TOP_CHATS_INTERVAL * 0.8);
   let results = msgpack.unpack(await db.getAsync(new Buffer('top_chats')));
   ctx.body = results;
 });
