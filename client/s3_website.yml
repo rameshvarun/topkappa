@@ -1,0 +1,5 @@
+s3_bucket: topkappa-client
+site: build
+index_document: index.html
+max_age:
+  "*": 14400

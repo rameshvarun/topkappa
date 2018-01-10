@@ -101,16 +101,17 @@ class ChatLine extends React.Component {
       }
 
       <span className={UPVOTED_SET.has(this.props.userstate.id) ? "upvoted" : "not-upvoted"} onClick={async () => {
+				let chat_id = this.props.userstate.id;
         await request({
           method: 'POST',
           uri: `${API_ENDPOINT}/upvote`,
           json: true,
           qs: {
             id_token: window.localStorage.user_id,
-            chat_id: this.props.userstate.id,
+            chat_id,
           }
         });
-        UPVOTED_SET.add(this.props.userstate.id);
+        UPVOTED_SET.add(chat_id);
         this.forceUpdate();
       }}>
         <FontAwesomeIcon icon={faCaretUp} size="lg" />
@@ -200,7 +201,7 @@ async refreshTopChats() {
 								scrolling="no"
 								id="chat_embed"
 								style={ this.state.tab == "all" ? {} : {display: 'none'} }
-								src="http://www.twitch.tv/embed/gamesdonequick/chat">
+								src="https://www.twitch.tv/embed/gamesdonequick/chat">
 					</iframe>
 			</MuiThemeProvider>
 
