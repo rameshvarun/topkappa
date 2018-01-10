@@ -29,8 +29,6 @@ const client = new tmi.client({
 });
 client.connect();
 
-const UPVOTED_SET = new Set();
-
 const CHAT_WAIT_MIN = 2 * 1000;
 const CHAT_WAIT_MAX = 3 * 1000;
 
@@ -92,15 +90,21 @@ function formatEmotes(text, emotes) {
 class ChatLine extends React.Component {
   constructor(props) {
     super(props);
+		this.state = { upvotes: this.props.upvotes }
 }
 
   render() {
+		let msg_id = this.props.userstate.id;
+		let isUpvoted = window.localStorage['upvoted_' + msg_id];
+
     return <div className='chat-line'>
       {
-        this.props.upvotes && <span className="upvote-count">{this.props.upvotes}</span>
+        this.state.upvotes && <span className="upvote-count">{this.state.upvotes}</span>
       }
 
-      <span className={"arrow " + (UPVOTED_SET.has(this.props.userstate.id) ? "upvoted" : "not-upvoted")} onClick={async () => {
+      <span className={"arrow " + (isUpvoted ? "upvoted" : "not-upvoted")} onClick={async () => {
+				if (isUpvoted) return;
+
 				let chat_id = this.props.userstate.id;
         await request({
           method: 'POST',
@@ -111,7 +115,12 @@ class ChatLine extends React.Component {
             chat_id,
           }
         });
-        UPVOTED_SET.add(chat_id);
+        window.localStorage['upvoted_' + msg_id] = true;
+				
+				if (this.state.upvotes) {
+					this.state.upvotes += 1;
+				}
+
         this.forceUpdate();
       }}>
         <FontAwesomeIcon icon={faCaretUp} size="lg" />
