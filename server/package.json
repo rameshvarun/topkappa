@@ -8,6 +8,7 @@
     "koa-json": "^2.0.2",
     "koa-router": "^7.3.0",
     "loglevel": "^1.6.0",
+    "msgpack": "^1.0.2",
     "redis": "^2.8.0",
     "simple-oauth2": "^1.5.0",
     "tmi.js": "^1.2.1",

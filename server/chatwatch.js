@@ -3,7 +3,9 @@ const uuidv4 = require('uuid/v4');
 const engine = require('engine.io');
 const redis = require("redis");
 const bluebird = require("bluebird");
-const {DATA_EXPIRE, CALCULATE_TOP_CHATS_INTERVAL} = require('./common');
+const msgpack = require('msgpack');
+
+const {DATA_EXPIRE, CALCULATE_TOP_CHATS_INTERVAL, loadScript} = require('./common');
 
 const log = require('loglevel');
 log.setLevel(process.env.LOGLEVEL || 'info');
@@ -23,15 +25,17 @@ function get_seconds_since_epoch() {
 }
 
 async function main() {
-  const db = redis.createClient();
+  const db = redis.createClient({detect_buffers: true});
   await db.flushallAsync();
+
+  const RECORD_MESSAGE_SCRIPT = await loadScript(db, './redis-scripts/record-message.lua');
 
   setInterval(async () => {
     log.debug("Calculating top scored chats...");
     let ids = await db.zrangeAsync(['scores', 0, NUM_TOP_CHATS - 1]);
     let results = await Promise.all(ids.map(async id => {
       let upvotes = await db.scardAsync(`${id}_upvotes`);
-      let data = JSON.parse(await db.getAsync(`${id}_data`));
+      let data = msgpack.unpack(await db.getAsync(new Buffer(`${id}_data`)));
 
       return {
         upvotes,
@@ -40,8 +44,7 @@ async function main() {
       }
     }));
 
-    results = results.filter(res => res.upvotes > 0);
-    await db.setAsync('top_chats', JSON.stringify(results));
+    await db.setAsync('top_chats', msgpack.pack(results));
   }, CALCULATE_TOP_CHATS_INTERVAL);
 
   setInterval(async () => {
@@ -65,11 +68,8 @@ async function main() {
       userstate, message
     };
 
-    // Save the chat data, with an expiration time.
-    await db.setAsync(`${id}_data`, JSON.stringify(chat));
-    await db.pexpireAsync([`${id}_data`, DATA_EXPIRE]);
-
-    await db.zaddAsync(['scores', 'NX', -seconds_since_epoch, id]);
+    // Save the chat data, creation time, and, with an expiration time.
+    await db.evalshaAsync([RECORD_MESSAGE_SCRIPT, 0, id, seconds_since_epoch, msgpack.pack(chat), DATA_EXPIRE]);
 
     log.debug("Chat message from %s at %f: %s", userstate['display-name'], seconds_since_epoch, message);
   });
