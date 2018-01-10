@@ -16,7 +16,8 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rx": "^4.1.0",
-    "tmi.js": "^1.2.1"
+    "tmi.js": "^1.2.1",
+    "uuid": "^3.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

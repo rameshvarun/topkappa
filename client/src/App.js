@@ -13,17 +13,20 @@ const request = require('request-promise');
 const queryString = require('query-string');
 const tmi = require("tmi.js");
 
+const uuidv4 = require('uuid/v4');
+
 const log = require('loglevel');
 window.log = log;
 
-const parsedHash = queryString.parse(window.location.hash);
-console.log(parsedHash);
-
+window.localStorage.user_id = (window.localStorage.user_id || uuidv4());
 const stringify = JSON.stringify;
 
 const NEW_CHATS_MAX = 100;
 
-const client = new tmi.client({ channels: ["#gamesdonequick"] });
+const client = new tmi.client({
+	connection: { reconnect: true },
+	channels: ["#gamesdonequick"]
+});
 client.connect();
 
 const UPVOTED_SET = new Set();
@@ -103,7 +106,7 @@ class ChatLine extends React.Component {
           uri: `${API_ENDPOINT}/upvote`,
           json: true,
           qs: {
-            id_token: parsedHash.id_token,
+            id_token: window.localStorage.user_id,
             chat_id: this.props.userstate.id,
           }
         });
@@ -184,14 +187,9 @@ async refreshTopChats() {
 				</Tabs>
 
 					<div id="chatbar" style={ this.state.tab == "vote" ? {} : {display: 'none'} }>
-						<div>
-							{ !parsedHash.id_token &&
-									<a href="https://api.twitch.tv/kraken/oauth2/authorize?client_id=kd9kqzvl8bbvw8mlft13rdklxi9w05&redirect_uri=http://localhost:3000&response_type=token%20id_token&scope=openid%20chat_login"><img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" className="twitch-connect" href="#" /></a>
-							}
-						</div>
 						<div class="chatbar-header">Top</div>
 						<div id="topchats">
-							{ this.state.top_chats.map(chat => <ChatLine upvotes={chat.upvotes} message={chat.message} userstate={chat.userstate} />) }
+							{ (this.state.top_chats || []).map(chat => <ChatLine upvotes={chat.upvotes} message={chat.message} userstate={chat.userstate} />) }
 						</div>
 						<div class="chatbar-header">New</div>
 						<div id="newchats">

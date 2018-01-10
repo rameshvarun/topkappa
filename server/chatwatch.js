@@ -55,13 +55,7 @@ async function main() {
 
 
   const client = new tmi.client({
-      connection: {
-          reconnect: true
-      },
-      identity: {
-          username: process.env.TWITCH_USERNAME,
-          password: process.env.TWITCH_OATH_PASSWORD
-      },
+      connection: { reconnect: true },
       channels: ["#gamesdonequick"]
   });
 
