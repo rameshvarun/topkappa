@@ -97,10 +97,10 @@ class ChatLine extends React.Component {
   render() {
     return <div className='chat-line'>
       {
-        this.props.upvotes && <span>{this.props.upvotes}</span>
+        this.props.upvotes && <span className="upvote-count">{this.props.upvotes}</span>
       }
 
-      <span className={UPVOTED_SET.has(this.props.userstate.id) ? "upvoted" : "not-upvoted"} onClick={async () => {
+      <span className={"arrow " + (UPVOTED_SET.has(this.props.userstate.id) ? "upvoted" : "not-upvoted")} onClick={async () => {
 				let chat_id = this.props.userstate.id;
         await request({
           method: 'POST',
@@ -158,8 +158,9 @@ async refreshTopChats() {
        if (current_time > next_message_time) {
 				 next_message_time = current_time + getRandomInt(CHAT_WAIT_MIN, CHAT_WAIT_MAX);
         this.setState((prev) => {
-          prev.new_chats.push({ userstate, message });
-          prev.new_chats = prev.new_chats.slice(Math.max(prev.new_chats.length - NEW_CHATS_MAX, 0));
+          prev.new_chats.unshift({ userstate, message });
+					while (prev.new_chats.length > NEW_CHATS_MAX)
+						prev.new_chats.pop();
           return prev;
         });
        }
