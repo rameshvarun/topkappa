@@ -34,8 +34,13 @@ async function main() {
     log.debug("Calculating top scored chats...");
     let ids = await db.zrangeAsync(['scores', 0, NUM_TOP_CHATS - 1]);
     let results = await Promise.all(ids.map(async id => {
-      let upvotes = await db.scardAsync(`${id}_upvotes`);
-      let data = msgpack.unpack(await db.getAsync(new Buffer(`${id}_data`)));
+      try {
+        var upvotes = await db.scardAsync(`${id}_upvotes`);
+        var data = msgpack.unpack(await db.getAsync(new Buffer(`${id}_data`)));
+      } catch (e) {
+        // Data has expired, so just return null.
+        return null;
+      }
 
       return {
         upvotes,
@@ -44,6 +49,7 @@ async function main() {
       }
     }));
 
+    results = results.filter(x => x !== null);
     await db.setAsync('top_chats', msgpack.pack(results));
   }, CALCULATE_TOP_CHATS_INTERVAL);
 
