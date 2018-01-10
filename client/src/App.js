@@ -24,7 +24,7 @@ const stringify = JSON.stringify;
 const NEW_CHATS_MAX = 100;
 
 const client = new tmi.client({
-	connection: { reconnect: true },
+	connection: { reconnect: true, secure: true },
 	channels: ["#gamesdonequick"]
 });
 client.connect();
@@ -124,7 +124,7 @@ class ChatLine extends React.Component {
   }
 }
 
-const API_ENDPOINT = "http://ec2-52-204-196-54.compute-1.amazonaws.com";
+const API_ENDPOINT = "https://d1nqfcql14qmqx.cloudfront.net";
 const TOP_CHAT_REFRESH_INTERVAL = 5 * 1000;
 
 
