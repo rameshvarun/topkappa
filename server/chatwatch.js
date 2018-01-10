@@ -3,17 +3,14 @@ const uuidv4 = require('uuid/v4');
 const engine = require('engine.io');
 const redis = require("redis");
 const bluebird = require("bluebird");
-const {DATA_EXPIRE} = require('./common');
+const {DATA_EXPIRE, CALCULATE_TOP_CHATS_INTERVAL} = require('./common');
 
 const log = require('loglevel');
-if (process.env.LOGLEVEL) log.setLevel(process.env.LOGLEVEL);
+log.setLevel(process.env.LOGLEVEL || 'info');
 
 // Promisify Redis client.
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
-
-// Recalculate the top charts every five seconds.
-const CALCULATE_TOP_CHATS_INTERVAL = 5 * 1000;
 
 // The top charts can have max 100 chats.
 const NUM_TOP_CHATS = 100;

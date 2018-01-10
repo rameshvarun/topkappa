@@ -4,6 +4,7 @@
     "engine.io": "^3.1.4",
     "koa": "^2.4.1",
     "koa-cors": "0.0.16",
+    "koa-ctx-cache-control": "^1.0.1",
     "koa-json": "^2.0.2",
     "koa-router": "^7.3.0",
     "loglevel": "^1.6.0",

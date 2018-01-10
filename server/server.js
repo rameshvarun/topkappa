@@ -1,12 +1,12 @@
 const engine = require('engine.io');
 const redis = require("redis");
 const bluebird = require("bluebird");
-const {DATA_EXPIRE} = require('./common');
+const {DATA_EXPIRE, CALCULATE_TOP_CHATS_INTERVAL} = require('./common');
 
 const stringify = JSON.stringify;
 
 const log = require('loglevel');
-if (process.env.LOGLEVEL) log.setLevel(process.env.LOGLEVEL);
+log.setLevel(process.env.LOGLEVEL || 'info');
 
 // Promisify Redis client.
 bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -25,9 +25,10 @@ const Router = require('koa-router');
 const app = new Koa();
 const router = new Router();
 
-
+require('koa-ctx-cache-control')(app);
 
 router.get('/top', async (ctx) => {
+  ctx.cacheControl(CALCULATE_TOP_CHATS_INTERVAL);
   let results = JSON.parse(await db.getAsync('top_chats'));
   ctx.body = results;
 });
