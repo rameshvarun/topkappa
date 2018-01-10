@@ -90,8 +90,8 @@ function formatEmotes(text, emotes) {
 class ChatLine extends React.Component {
   constructor(props) {
     super(props);
-		this.state = { upvotes: this.props.upvotes }
 }
+
 
   render() {
 		let msg_id = this.props.userstate.id;
@@ -99,7 +99,7 @@ class ChatLine extends React.Component {
 
     return <div className='chat-line'>
       {
-        this.state.upvotes && <span className="upvote-count">{this.state.upvotes}</span>
+        this.props.upvotes && <span className="upvote-count">{this.props.upvotes}</span>
       }
 
       <span className={"arrow " + (isUpvoted ? "upvoted" : "not-upvoted")} onClick={async () => {
@@ -116,11 +116,6 @@ class ChatLine extends React.Component {
           }
         });
         window.localStorage['upvoted_' + msg_id] = true;
-				
-				if (this.state.upvotes) {
-					this.state.upvotes += 1;
-				}
-
         this.forceUpdate();
       }}>
         <FontAwesomeIcon icon={faCaretUp} size="lg" />
