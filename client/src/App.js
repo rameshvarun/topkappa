@@ -12,6 +12,8 @@ import faInfoCircle from "@fortawesome/fontawesome-free-solid/faInfoCircle";
 import faChevronDown from "@fortawesome/fontawesome-free-solid/faChevronDown";
 import faChevronUp from "@fortawesome/fontawesome-free-solid/faChevronUp";
 
+import * as copypasta from './copypasta-tracker';
+
 import ReactTooltip from "react-tooltip";
 
 const request = require("request-promise");
@@ -100,11 +102,20 @@ function formatEmotes(text, emotes) {
   return splitText;
 }
 
-class ChatLine extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+class CopyPastaLine extends React.Component {
+	render() {
+		return (
+      <div className="chat-line">
+				<span className="upvote-count">{this.props.count}</span>
+				<span className="chat-message">
+					{formatEmotes(this.props.message, this.props.emotes)}
+				</span>
+			</div>
+		);
+	}
+}
 
+class ChatLine extends React.Component {
   render() {
     let msg_id = this.props.userstate.id;
     let isUpvoted = window.localStorage["upvoted_" + msg_id];
@@ -156,6 +167,7 @@ const API_ENDPOINT =
 log.info("API Endpoint: %s.", API_ENDPOINT);
 
 const TOP_CHAT_REFRESH_INTERVAL = 3 * 1000;
+const COPYPASTA_REFRESH_INTERVAL = 10 * 1000;
 
 class App extends Component {
   constructor(props) {
@@ -164,7 +176,9 @@ class App extends Component {
       new_chats: [],
       top_chats: [],
       tab: "vote",
-      new_visible: true
+      new_visible: true,
+      copypasta_visible: true,
+			pastas: [],
     };
   }
 
@@ -189,7 +203,9 @@ class App extends Component {
 
     let next_message_time = 0;
     client.on("chat", async (channel, userstate, message, self) => {
-      log.debug("Chat message from %s: %s", userstate["display-name"], message);
+      log.trace("Chat message from %s: %s", userstate["display-name"], message);
+
+			copypasta.storeMessage(message, userstate);
 
       let current_time = new Date().getTime();
       if (current_time > next_message_time) {
@@ -202,6 +218,15 @@ class App extends Component {
         });
       }
     });
+
+		let copyPastaInterval = setInterval(() => {
+			log.debug("Updating top copypastas.");
+			let pastas = copypasta.getTopCopypastas();
+			this.setState(prev => {
+				prev.pastas = pastas;
+				return prev;
+			});
+		}, COPYPASTA_REFRESH_INTERVAL);
   }
   render() {
     return (
@@ -247,6 +272,45 @@ class App extends Component {
                   />
                 ))}
               </div>
+							<div class="chatbar-header">
+                {this.state.copypasta_visible && (
+                  <span
+                    onClick={() => {
+                      this.setState(prev => {
+                        prev.copypasta_visible = false;
+                        return prev;
+                      });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </span>
+                )}
+                {!this.state.copypasta_visible && (
+                  <span
+                    onClick={() => {
+                      this.setState(prev => {
+                        prev.copypasta_visible = true;
+                        return prev;
+                      });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronUp} />
+                  </span>
+                )}
+								<span>Copypastas</span>
+								<span data-tip="Copypastas from the last 5 minutes are counted here.">
+									<FontAwesomeIcon icon={faInfoCircle} />
+								</span>
+							</div>
+							{ this.state.copypasta_visible && <div id="copypastas">
+  								{this.state.pastas.map(pasta => (
+  									<CopyPastaLine
+  										message={pasta.message}
+  										emotes={pasta.emotes}
+  										count={pasta.count}
+  									/>
+  								))}
+  							</div> }
               <div class="chatbar-header">
                 {this.state.new_visible && (
                   <span

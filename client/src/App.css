@@ -12,6 +12,14 @@
   background-color: #EFEEF1;
 }
 
+#copypastas {
+  overflow-y: scroll;
+  flex-grow: 0.6;
+  min-height: 15%;
+  padding: 10px;
+  background-color: #EFEEF1;
+}
+
 #topchats {
   overflow-y: scroll;
   flex-grow: 1;
@@ -26,7 +34,10 @@
   flex-direction: row;
   justify-content: space-between;
   color: white;
-  padding: 10px;
+  min-height: 38px;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .not-upvoted {

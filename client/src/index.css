@@ -18,6 +18,11 @@ html, body {
   overflow: hidden;
 }
 
+#root.full {
+  width: 100%;
+}
+
+
 #twitch-embed {
   flex-grow: 3;
   width: 100%;
