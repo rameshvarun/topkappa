@@ -10,6 +10,7 @@ import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faCaretUp from "@fortawesome/fontawesome-free-solid/faArrowUp";
 import faInfoCircle from "@fortawesome/fontawesome-free-solid/faInfoCircle";
 import faChevronDown from "@fortawesome/fontawesome-free-solid/faChevronDown";
+import faChevronUp from "@fortawesome/fontawesome-free-solid/faChevronUp";
 
 import ReactTooltip from "react-tooltip";
 
@@ -205,92 +206,99 @@ class App extends Component {
   render() {
     return (
       <Fragment>
-        <MuiThemeProvider>
-          <Tabs>
-            <Tab
-              label="TopKappa"
-              onActive={() => {
-                this.setState(prev => {
-                  prev.tab = "vote";
-                  return prev;
-                });
-              }}
-            />
-            <Tab
-              label="All"
-              onActive={() => {
-                this.setState(prev => {
-                  prev.tab = "all";
-                  return prev;
-                });
-              }}
-            />
-          </Tabs>
-        </MuiThemeProvider>
-        <div
-          id="chatbar"
-          style={this.state.tab == "vote" ? {} : { display: "none" }}
-        >
-          <div class="chatbar-header">
-            <span /> <span>Top</span>{" "}
-            <span data-tip="Top upvoted chats will appear here.">
-              <FontAwesomeIcon icon={faInfoCircle} />
-            </span>{" "}
-          </div>
-          <div id="topchats">
-            {(this.state.top_chats || []).map(chat => (
-              <ChatLine
-                upvotes={chat.upvotes}
-                message={chat.message}
-                userstate={chat.userstate}
+        <div id="chatbar">
+          <MuiThemeProvider>
+            <Tabs>
+              <Tab
+                label="TopKappa"
+                onActive={() => {
+                  this.setState(prev => {
+                    prev.tab = "vote";
+                    return prev;
+                  });
+                }}
               />
-            ))}
-          </div>
-          <div class="chatbar-header">
-            {this.state.new_visible && (
-              <span
-                onClick={() => {
+              <Tab
+                label="All"
+                onActive={() => {
                   this.setState(prev => {
-                    prev.new_visible = false;
+                    prev.tab = "all";
                     return prev;
                   });
                 }}
-              >
-                <FontAwesomeIcon icon={faChevronDown} />
-              </span>
-            )}
-            {!this.state.new_visible && (
-              <span
-                onClick={() => {
-                  this.setState(prev => {
-                    prev.new_visible = true;
-                    return prev;
-                  });
-                }}
-              >
-                <FontAwesomeIcon icon={faChevronDown} />
-              </span>
-            )}
-            <span>New</span>
-            <span data-tip="Random new chats will appear here for you to upvote.">
-              <FontAwesomeIcon icon={faInfoCircle} />
-            </span>
-          </div>
-          {this.state.new_visible && (
-            <div id="newchats">
-              {this.state.new_chats.map(chat => (
-                <ChatLine message={chat.message} userstate={chat.userstate} />
-              ))}
-            </div>
+              />
+            </Tabs>
+          </MuiThemeProvider>
+
+          {this.state.tab == "vote" && (
+            <Fragment>
+              <div class="chatbar-header">
+                <span /> <span>Top</span>{" "}
+                <span data-tip="Top upvoted chats will appear here.">
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                </span>{" "}
+              </div>
+              <div id="topchats">
+                {(this.state.top_chats || []).map(chat => (
+                  <ChatLine
+                    upvotes={chat.upvotes}
+                    message={chat.message}
+                    userstate={chat.userstate}
+                  />
+                ))}
+              </div>
+              <div class="chatbar-header">
+                {this.state.new_visible && (
+                  <span
+                    onClick={() => {
+                      this.setState(prev => {
+                        prev.new_visible = false;
+                        return prev;
+                      });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </span>
+                )}
+                {!this.state.new_visible && (
+                  <span
+                    onClick={() => {
+                      this.setState(prev => {
+                        prev.new_visible = true;
+                        return prev;
+                      });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronUp} />
+                  </span>
+                )}
+                <span>New</span>
+                <span data-tip="Random new chats will appear here for you to upvote.">
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                </span>
+              </div>
+              {this.state.new_visible && (
+                <div id="newchats">
+                  {this.state.new_chats.map(chat => (
+                    <ChatLine
+                      message={chat.message}
+                      userstate={chat.userstate}
+                    />
+                  ))}
+                </div>
+              )}
+            </Fragment>
           )}
+
+          <iframe
+            frameborder="0"
+            scrolling="no"
+            id="chat_embed"
+            style={this.state.tab == "all" ? {} : { display: "none" }}
+            src="https://www.twitch.tv/embed/gamesdonequick/chat"
+          />
         </div>
-        <iframe
-          frameborder="0"
-          scrolling="no"
-          id="chat_embed"
-          style={this.state.tab == "all" ? {} : { display: "none" }}
-          src="https://www.twitch.tv/embed/gamesdonequick/chat"
-        />
+
         <ReactTooltip />
       </Fragment>
     );

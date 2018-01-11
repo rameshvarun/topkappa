@@ -7,14 +7,14 @@
 
 #newchats {
   overflow-y: scroll;
-  flex-grow: 0.5;
+  flex-grow: 1;
   padding: 10px;
   background-color: #EFEEF1;
 }
 
 #topchats {
   overflow-y: scroll;
-  flex-grow: 0.5;
+  flex-grow: 1;
   min-height: 40%;
   padding: 10px;
   background-color: #EFEEF1;
