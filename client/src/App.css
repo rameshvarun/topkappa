@@ -22,7 +22,9 @@
 
 .chatbar-header {
   background-color: #6441A4;
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   color: white;
   padding: 10px;
 }

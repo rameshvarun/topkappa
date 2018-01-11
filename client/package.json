@@ -13,6 +13,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.0.17",
+    "react-tooltip": "^3.4.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rx": "^4.1.0",
