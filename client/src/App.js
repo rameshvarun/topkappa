@@ -257,7 +257,7 @@ class App extends Component {
 
           {this.state.tab == "vote" && (
             <Fragment>
-              <div class="chatbar-header">
+              <div className="chatbar-header">
                 <span /> <span>Top</span>{" "}
                 <span data-tip="Top upvoted chats will appear here.">
                   <FontAwesomeIcon icon={faInfoCircle} />
@@ -266,13 +266,14 @@ class App extends Component {
               <div id="topchats">
                 {(this.state.top_chats || []).map(chat => (
                   <ChatLine
+                    key={chat.userstate.id}
                     upvotes={chat.upvotes}
                     message={chat.message}
                     userstate={chat.userstate}
                   />
                 ))}
               </div>
-              <div class="chatbar-header">
+              <div className="chatbar-header">
                 {this.state.copypasta_visible && (
                   <span
                     onClick={() => {
@@ -306,6 +307,7 @@ class App extends Component {
                 <div id="copypastas">
                   {this.state.pastas.map(pasta => (
                     <CopyPastaLine
+                      key={pasta.message}
                       message={pasta.message}
                       emotes={pasta.emotes}
                       count={pasta.count}
@@ -313,7 +315,7 @@ class App extends Component {
                   ))}
                 </div>
               )}
-              <div class="chatbar-header">
+              <div className="chatbar-header">
                 {this.state.new_visible && (
                   <span
                     onClick={() => {
@@ -347,6 +349,7 @@ class App extends Component {
                 <div id="newchats">
                   {this.state.new_chats.map(chat => (
                     <ChatLine
+                      key={chat.userstate.id}
                       message={chat.message}
                       userstate={chat.userstate}
                     />
@@ -357,10 +360,11 @@ class App extends Component {
           )}
 
           <iframe
-            frameborder="0"
-            scrolling="no"
+            frameBorder="0"
             id="chat_embed"
-            style={this.state.tab == "all" ? {} : { display: "none" }}
+            style={this.state.tab == "all" ?
+              {} :
+              { position: "absolute", zIndex: -100 }}
             src="https://www.twitch.tv/embed/gamesdonequick/chat"
           />
         </div>
