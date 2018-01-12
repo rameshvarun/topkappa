@@ -3,7 +3,8 @@ assert(MESSAGE_ID, "Message ID required.")
 assert(USER_ID, "User ID required.")
 assert(EXPIRE_TIME, "Expire time (ms) required.")
 
-local UPVOTE_WIEGHT = 10.0
+-- Upvotes add 60 seconds of time travel to score.
+local UPVOTE_WIEGHT = 60.0
 local function score(time, num_upvotes)
   return -time - num_upvotes * UPVOTE_WIEGHT
 end
